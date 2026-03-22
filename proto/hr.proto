@@ -1,0 +1,201 @@
+syntax = "proto3";
+
+package hr;
+
+option go_package = "zhangbolong/OASIS-hr/proto;hr";
+
+// Employee models
+message Employee {
+    string id = 1;
+    string first_name = 2;
+    string last_name = 3;
+    string email = 4;
+    string phone_number = 5;
+    string department_id = 6;
+    string role = 7;
+    int32 level = 8;
+    string status = 9;
+    string start_date = 10;
+    string end_date = 11;
+    string manager_id = 12;
+    repeated string direct_reports = 13;
+}
+
+message EmployeeBrief {
+    string id = 1;
+    string first_name = 2;
+    string last_name = 3;
+    string role = 4;
+    int32 level = 5;
+    string department_id = 6;
+    string manager_id = 7;
+    string status = 8;
+}
+
+// Department models
+message Department {
+    string id = 1;
+    string name = 2;
+    string parent_id = 3;
+    repeated string child_ids = 4;
+    string description = 5;
+}
+
+message DepartmentBrief {
+    string id = 1;
+    string name = 2;
+}
+
+// Common messages
+message Empty {}
+
+// EmployeeService
+service EmployeeService {
+    // CRUD
+    rpc CreateEmployee(CreateEmployeeRequest) returns (Employee);
+    rpc GetEmployee(GetEmployeeRequest) returns (Employee);
+    rpc UpdateEmployee(UpdateEmployeeRequest) returns (Employee);
+    rpc DeleteEmployee(DeleteEmployeeRequest) returns (Empty);
+
+    // List
+    rpc ListEmployees(ListEmployeesRequest) returns (ListEmployeesResponse);
+
+    // Hierarchy - Upward
+    rpc GetDirectManager(GetDirectManagerRequest) returns (Employee);
+    rpc SetManager(SetManagerRequest) returns (Empty);
+
+    // Hierarchy - Downward
+    rpc GetDirectReports(GetDirectReportsRequest) returns (GetDirectReportsResponse);
+    rpc AddDirectReport(AddDirectReportRequest) returns (Empty);
+    rpc RemoveDirectReport(RemoveDirectReportRequest) returns (Empty);
+
+    // Tree Query
+    rpc GetEmployeeTree(GetEmployeeTreeRequest) returns (GetEmployeeTreeResponse);
+}
+
+// DepartmentService
+service DepartmentService {
+    // CRUD
+    rpc CreateDepartment(CreateDepartmentRequest) returns (Department);
+    rpc GetDepartment(GetDepartmentRequest) returns (Department);
+    rpc UpdateDepartment(UpdateDepartmentRequest) returns (Department);
+    rpc DeleteDepartment(DeleteDepartmentRequest) returns (Empty);
+
+    // List
+    rpc ListDepartments(ListDepartmentsRequest) returns (ListDepartmentsResponse);
+
+    // Hierarchy - Upward
+    rpc GetParentDepartment(GetParentDepartmentRequest) returns (Department);
+    rpc SetParentDepartment(SetParentDepartmentRequest) returns (Empty);
+
+    // Hierarchy - Downward
+    rpc GetChildDepartments(GetChildDepartmentsRequest) returns (GetChildDepartmentsResponse);
+    rpc AddChildDepartment(AddChildDepartmentRequest) returns (Empty);
+    rpc RemoveChildDepartment(RemoveChildDepartmentRequest) returns (Empty);
+
+    // Tree Query
+    rpc GetDepartmentTree(GetDepartmentTreeRequest) returns (GetDepartmentTreeResponse);
+}
+
+// --- Request and Response Messages below ---
+
+// Employee Requests
+message CreateEmployeeRequest {
+    Employee employee = 1;
+}
+message GetEmployeeRequest {
+    string id = 1;
+}
+message UpdateEmployeeRequest {
+    string id = 1;
+    Employee employee = 2;
+}
+message DeleteEmployeeRequest {
+    string id = 1;
+}
+message ListEmployeesRequest {
+    string token = 1;
+    int32 limit = 2;
+    bool skip_inactive = 3;
+}
+message ListEmployeesResponse {
+    repeated EmployeeBrief employees = 1;
+    string next_token = 2;
+}
+message GetDirectManagerRequest {
+    string employee_id = 1;
+}
+message SetManagerRequest {
+    string employee_id = 1;
+    string manager_id = 2;
+}
+message GetDirectReportsRequest {
+    string employee_id = 1;
+}
+message GetDirectReportsResponse {
+    repeated string direct_reports = 1;
+}
+message AddDirectReportRequest {
+    string manager_id = 1;
+    string employee_id = 2;
+}
+message RemoveDirectReportRequest {
+    string manager_id = 1;
+    string employee_id = 2;
+}
+message GetEmployeeTreeRequest {
+    string manager_id = 1;
+}
+message GetEmployeeTreeResponse {
+    repeated string direct_reports = 1; // 1-level only
+}
+
+// Department Requests
+message CreateDepartmentRequest {
+    Department department = 1;
+}
+message GetDepartmentRequest {
+    string id = 1;
+}
+message UpdateDepartmentRequest {
+    string id = 1;
+    Department department = 2;
+}
+message DeleteDepartmentRequest {
+    string id = 1;
+}
+message ListDepartmentsRequest {
+    string token = 1;
+    int32 limit = 2;
+}
+message ListDepartmentsResponse {
+    repeated DepartmentBrief departments = 1;
+    string next_token = 2;
+}
+message GetParentDepartmentRequest {
+    string department_id = 1;
+}
+message SetParentDepartmentRequest {
+    string department_id = 1;
+    string parent_id = 2;
+}
+message GetChildDepartmentsRequest {
+    string parent_id = 1;
+}
+message GetChildDepartmentsResponse {
+    repeated string child_ids = 1;
+}
+message AddChildDepartmentRequest {
+    string parent_id = 1;
+    string department_id = 2;
+}
+message RemoveChildDepartmentRequest {
+    string parent_id = 1;
+    string department_id = 2;
+}
+message GetDepartmentTreeRequest {
+    string parent_id = 1;
+}
+message GetDepartmentTreeResponse {
+    repeated string child_ids = 1; // 1-level only
+}
